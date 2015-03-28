@@ -1,6 +1,7 @@
 var http = require('http'),
     express = require('express'),
     path = require('path'),
+    Mongoose = require('mongoose'),
     MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
     RocketsController = require('./controllers/rocketController').RocketController
