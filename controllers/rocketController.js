@@ -35,7 +35,7 @@ RocketController.prototype.getAllRockets = function(manufacturer, callback) {
                     } else {
                         x.oid = x._id;
                         delete x._id;
-                        console.log(x);
+                        debug(x);
                         result.push(x);
                     }
                 })

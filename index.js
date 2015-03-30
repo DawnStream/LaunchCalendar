@@ -1,9 +1,11 @@
 var http = require('http'),
+    debug = require('debug')('http'),
     express = require('express'),
     path = require('path'),
     Mongoose = require('mongoose'),
     MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
+    bodyParser = require('body-parser'),
     RocketsController = require('./controllers/rocketController').RocketController
 
 
@@ -32,7 +34,7 @@ mongoClient.open(function(err, mongoClient) {
 
 var app = express();
 app.set('port', process.env.PORT || 3000);
-
+app.use(bodyParser.json());
 app.use(function(req, res, next) {
     console.log('%s @ %s: %s %s', req.headers.host, req.headers['x-real-ip'],
         req.method, req.url);
@@ -58,6 +60,18 @@ app.get('/cal/:manufacturer', function(req, res) {
         }
     })
 });
+
+app.post('/testDate/', function(req, res) {
+    var db = mongoClient.db("test");
+    d = new Date(req.body.date);
+    debug(d);
+    db.collection('TEST', function (err, testCollection) {
+        if (!err) {
+            testCollection.insert({'date' : d}, function(err) {});
+        }
+    })
+    res.send("whatever");
+})
 
 app.use(function(req, res) {
     res.send(req.url);
