@@ -6,9 +6,9 @@ debug = require('debug')('http');
 
 var ObjectID = require('mongodb').ObjectID;
 
-function RocketController(db) {
+RocketController = function(db) {
     this.db = db;
-}
+};
 
 RocketController.prototype.getManufacturer = function(manufacturer, callback) {
     var q = {};
@@ -82,4 +82,15 @@ RocketController.prototype.getModel = function(model, callback) {
     });
 };
 
+RocketController.prototype.create = function(rocket, callback) {
+    this.db.collection('Rockets', function(err, rocketCollection) {
+        rocketCollection.insert(rocket, function(err, doc) {
+            if (err) {
+                callback(err, {});
+            } else {
+                callback(null, doc);
+            }
+        })
+    })
+};
 module.exports = RocketController;

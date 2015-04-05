@@ -6,6 +6,7 @@ var http = require('http'),
     MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
     bodyParser = require('body-parser'),
+    LaunchController = require('./controllers/launchController'),
     RocketController = require('./controllers/rocketController');
 
 
@@ -14,6 +15,7 @@ var mongoPort = 27017;
 
 var mongoClient = new MongoClient(new Server(mongoHost, mongoPort));
 var rocketController;
+var launchController;
 
 mongoClient.open(function(err, mongoClient) {
     if (!mongoClient) {
@@ -22,6 +24,7 @@ mongoClient.open(function(err, mongoClient) {
     }
     var db = mongoClient.db("test");
     rocketController = new RocketController(db);
+    launchController = new LaunchController(db);
 });
 
 var app = express();
@@ -56,14 +59,34 @@ app.get('/rocket/model/:model', function(req, res) {
         }
         else {
             console.log(rockets);
-             res.json(rockets);
+            res.json(rockets);
+        }
+    })
+});
+
+app.post('/rocket/', function (req, res) {
+    rocketController.create(req.body, function(err, doc) {
+        if (err) {
+            res.err(404);
+        } else {
+            res.send(doc);
+        }
+    })
+});
+
+app.post('/launch/', function (req, res) {
+    launchController.create(req.body, function(err, doc) {
+        if (err) {
+            res.err(404);
+        } else {
+            res.send(doc);
         }
     })
 });
 
 app.post('/testDate/', function(req, res) {
     var db = mongoClient.db("test");
-    d = new Date(req.body.date);
+    var d = new Date(req.body.date);
     if (!isNaN(d.getTime())) {
         db.collection('TEST', function (err, testCollection) {
             if (!err) {
