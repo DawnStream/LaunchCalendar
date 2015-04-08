@@ -10,20 +10,18 @@ LaunchController = function(db) {
     this.db = db;
 };
 
-LaunchController.prototype.getModel = function(model, callback) {
+LaunchController.prototype.getAll = function(callback) {
     var q = {};
     var result = [];
-    if (model != "all") {
-        q.Model = model;
-    }
-    this.db.collection('Rockets', function(err, rocketsCollection) {
+
+    this.db.collection('TestLaunches', function(err, launchCollection) {
         if (err) {
             callback(err);
             return;
         }
-        rocketsCollection.find(
+        launchCollection.find(
             q,
-            function (err, rockets) {
+            function (err, launches) {
                 if (err) {
                     callback(err);
                     return;
@@ -31,7 +29,7 @@ LaunchController.prototype.getModel = function(model, callback) {
                 /* rockets.count(function (err, count) {
                  console.log("count = ", count);
                  })   */
-                rockets.each(function (err, x) {
+                launches.each(function (err, x) {
                     if (x == null) {
                         callback(err, result);
                     } else {
@@ -47,8 +45,8 @@ LaunchController.prototype.getModel = function(model, callback) {
 };
 
 LaunchController.prototype.create = function(rocket, callback) {
-    this.db.collection('TestLaunches', function(err, rocketCollection) {
-        rocketCollection.insert(rocket, function(err, doc) {
+    this.db.collection('TestLaunches', function(err, launchCollection) {
+        launchCollection.insert(rocket, function(err, doc) {
             if (err) {
                 callback(err, {});
             } else {
