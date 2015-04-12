@@ -117,12 +117,27 @@ app.use(function(req, res) {
     res.send(req.url);
 });
 
+app1.use(function(req, res, next) {
+    console.log('%s @ %s: %s %s', req.headers.host, req.headers['x-real-ip'],
+        req.method, req.url);
+    next();
+});
+
 app1.use(function(req, res) {
     var ical = new icalendar.iCalendar();
-    var event = ical.addComponent('VEVENT');
-    event.setSummary('test1');
-    event.setDate(new Date(), 60*60);
-    res.send(ical.toString());
+    launchController.getAll(function(err, launches) {
+        if (err) {
+            res.send(500);
+        } else {
+            for (i = 0, leng = launches.length; i < leng; ++i) {
+                var event = new icalendar.VEvent();
+                event.setDate(launches[i].Date, 60*60);
+                event.setSummary(launches[i].Mission + '-' + launches[i].Rocket.Model + launches[i].Rocket.Version);
+                ical.addComponent(event);
+            }
+            res.send(ical.toString());
+        }
+    });
 })
 
 http.createServer(app).listen(app.get('port'), function(){
