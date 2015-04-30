@@ -123,7 +123,7 @@ app1.use(function(req, res, next) {
     next();
 });
 
-app1.use(function(req, res) {
+app1.get('/',function(req, res) {
     var ical = new icalendar.iCalendar();
     launchController.getAll(function(err, launches) {
         if (err) {
@@ -140,6 +140,9 @@ app1.use(function(req, res) {
     });
 })
 
+app1.use(function(req, res) {
+  res.send(404);
+});
 http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
 });
