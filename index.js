@@ -7,7 +7,8 @@ var http = require('http'),
     Server = require('mongodb').Server,
     bodyParser = require('body-parser'),
     LaunchController = require('./controllers/launchController'),
-    RocketController = require('./controllers/rocketController');
+    RocketController = require('./controllers/rocketController'),
+    icalendar = require('icalendar');
 
 
 var mongoHost = 'localHost';
@@ -28,6 +29,8 @@ mongoClient.open(function(err, mongoClient) {
 });
 
 var app = express();
+var app1 = express();
+app1.set('port', 8080);
 app.set('port', process.env.PORT || 3000);
 app.use(bodyParser.json());
 app.use(function(req, res, next) {
@@ -44,8 +47,7 @@ app.get('/rocket/manufacturer/:manufacturer', function(req, res) {
     rocketController.getManufacturer(req.params.manufacturer, function (err, rockets) {
         if (err) {
             res.send(400, err);
-        }
-        else {
+        } else {
             console.log(rockets);
             res.json(rockets);
         }
@@ -56,8 +58,7 @@ app.get('/rocket/model/:model', function(req, res) {
     rocketController.getModel(req.params.model, function (err, rockets) {
         if (err) {
             res.send(400, err);
-        }
-        else {
+        } else {
             console.log(rockets);
             res.json(rockets);
         }
@@ -73,6 +74,16 @@ app.post('/rocket/', function (req, res) {
         }
     })
 });
+
+app.get('/launch/', function(req, res) {
+    launchController.getAll(function (err, launches) {
+        if (err) {
+            res.send(400, err);
+        } else {
+            res.json(launches);
+        }
+    })
+})
 
 app.post('/launch/', function (req, res) {
     launchController.create(req.body, function(err, doc) {
@@ -106,6 +117,37 @@ app.use(function(req, res) {
     res.send(req.url);
 });
 
+app1.use(function(req, res, next) {
+    console.log('%s @ %s: %s %s', req.headers.host, req.headers['x-real-ip'],
+        req.method, req.url);
+    next();
+});
+
+app1.get('/',function(req, res) {
+    var ical = new icalendar.iCalendar();
+    launchController.getAll(function(err, launches) {
+        if (err) {
+            res.send(500);
+        } else {
+            for (i = 0, leng = launches.length; i < leng; ++i) {
+                var event = new icalendar.VEvent();
+                event.setDate(launches[i].Date, 60*60);
+                event.setSummary(launches[i].Mission + '-' + launches[i].Rocket.Model + launches[i].Rocket.Version);
+                ical.addComponent(event);
+            }
+            res.send(ical.toString());
+        }
+    });
+})
+
+app1.use(function(req, res) {
+  res.send(404);
+});
 http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
 });
+
+http.createServer(app1).listen(app1.get('port'), function(){
+    console.log('Express server listening on port ' + app1.get('port'));
+});
+
