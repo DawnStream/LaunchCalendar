@@ -46,7 +46,7 @@ LaunchController.prototype.getAll = function(callback) {
 
 LaunchController.prototype.create = function(launch, callback) {
     this.db.collection('TestLaunches', function(err, launchCollection) {
-        launch.creted = new Date();
+        launch.created = new Date();
         launchCollection.insert(launch, function(err, doc) {
             if (err) {
                 callback(err, {});
